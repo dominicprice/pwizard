@@ -531,6 +531,18 @@ files = [
 ]
 
 [[package]]
+name = "types-colorama"
+version = "0.4.15.20250801"
+description = "Typing stubs for colorama"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "types_colorama-0.4.15.20250801-py3-none-any.whl", hash = "sha256:b6e89bd3b250fdad13a8b6a465c933f4a5afe485ea2e2f104d739be50b13eea9"},
+    {file = "types_colorama-0.4.15.20250801.tar.gz", hash = "sha256:02565d13d68963d12237d3f330f5ecd622a3179f7b5b14ee7f16146270c357f5"},
+]
+
+[[package]]
 name = "types-peewee"
 version = "3.18.3.20251105"
 description = "Typing stubs for peewee"
@@ -557,4 +569,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "92974a430f0afcc0743cac033c079739cc0b679a0820171c89388b4103acda9b"
+content-hash = "511e3c70f395f12c8b4577be11fa17f7b74b312a76f33b4c54b2be718cd468cd"

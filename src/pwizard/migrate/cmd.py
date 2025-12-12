@@ -1,9 +1,10 @@
-from colorama import Fore, Style, init as init_colorama
+import typing as t
 from datetime import timedelta
 from glob import glob
-import typing as t
 
 import click
+from colorama import Fore, Style
+from colorama import init as init_colorama
 from playhouse.db_url import connect
 
 from pwizard.migrate import MigrationWarning, Migrator
@@ -79,7 +80,7 @@ def migrate_cmd(
         migrations.extend([SQLMigration(f) for f in sorted(glob(pat))])
 
     # set up hooks based on verbosity level
-    hooks = Verbosity0Hooks()
+    hooks: MigrationHooks = Verbosity0Hooks()
     if verbose == 1:
         hooks = Verbosity1Hooks()
     elif verbose == 2:

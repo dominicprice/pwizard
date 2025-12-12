@@ -1,4 +1,5 @@
 import click
+
 from pwizard.generate.cmd import generate_cmd
 from pwizard.migrate.cmd import migrate_cmd
 

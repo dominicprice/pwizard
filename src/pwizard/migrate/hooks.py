@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from pwizard.migrate.migration import Migration
 from pwizard.migrate.warnings import MigrationWarning
 

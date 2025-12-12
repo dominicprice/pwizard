@@ -133,8 +133,8 @@ class Migrator:
                     table_name=self.table_name,
                     param=database.param,
                 )
-                params = (migration.hash(), migration.name())
-                database.execute_sql(stmt, params)
+                hash_params = (migration.hash(), migration.name())
+                database.execute_sql(stmt, hash_params)
                 fixed = True
         elif applied_migration.parent != parent:
             warning = ParentDiffersWarning(
@@ -147,8 +147,8 @@ class Migrator:
                     table_name=self.table_name,
                     param=database.param,
                 )
-                params = (parent, migration.name())
-                database.execute_sql(stmt, params)
+                parent_params = (parent, migration.name())
+                database.execute_sql(stmt, parent_params)
                 fixed = True
 
         return warning, fixed

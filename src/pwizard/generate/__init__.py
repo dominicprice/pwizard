@@ -11,7 +11,7 @@ import peewee
 from playhouse.reflection import DatabaseMetadata, Introspector
 
 from pwizard.generate.types import Column, DatabaseType, Index, Table
-from pwizard.generate.utils import split_relist
+from pwizard.utils.split import split_relist
 
 if t.TYPE_CHECKING:
     from _typeshed import StrOrBytesPath
@@ -23,7 +23,7 @@ class Generator:
         output_path: "StrOrBytesPath",
         *,
         driver: DatabaseType | None = None,
-        templates_dir: "StrOrBytesPath | None" = None,
+        template_path: "StrOrBytesPath | None" = None,
         include_tables: list[str | re.Pattern] = [],
         exclude_tables: list[str | re.Pattern] = [],
         include_views: bool = True,
@@ -31,10 +31,10 @@ class Generator:
     ):
         self.output_path = output_path
         self.driver = driver
-        if templates_dir is None:
-            self.templates_dir = Path(__file__).parent / "templates"
+        if template_path is None:
+            self.template_path = Path(__file__).parent / "templates" / "main.py.tmpl"
         else:
-            self.templates_dir = Path(os.fsdecode(templates_dir))
+            self.template_path = Path(os.fsdecode(template_path))
         self.include_views = include_views
         self.snake_case = snake_case
         self.include_tables = include_tables
@@ -66,7 +66,7 @@ class Generator:
         kwargs["exclude_tables"] = models.getrelist("exclude_tables", fallback=[])
 
         templates = parser["templates"]
-        kwargs["templates_dir"] = templates.get("templates_dir", fallback=None)
+        kwargs["template_path"] = templates.get("template_path", fallback=None)
         kwargs["snake_case"] = templates.getboolean("snake_case", fallback=True)
 
         output = parser["output"]
@@ -87,9 +87,9 @@ class Generator:
                 driver = DatabaseType.Proxy
 
         # create the template
-        loader = jinja2.FileSystemLoader(self.templates_dir)
+        loader = jinja2.FileSystemLoader(self.template_path.parent)
         jinja = jinja2.Environment(loader=loader)
-        template = jinja.get_template("main.py.tmpl")
+        template = jinja.get_template(self.template_path.name)
 
         # get the data for the template from the database
         introspector = Introspector.from_database(database)
@@ -143,6 +143,18 @@ class Generator:
     ):
         if table in tables:
             # already parsed
+            return
+
+        if self._skip_table(table):
+            # check if trying to skip a table which is a foreign key relation
+            if len(accum) > 0:
+                raise RuntimeError(
+                    "cannot exclude table '"
+                    + table
+                    + "' as it is required by a foreign key relation"
+                )
+
+            # exclude from output
             return
 
         # ensure all tables to foreign keys have been parsed
@@ -213,3 +225,29 @@ class Generator:
         )
 
         tables[metadata.model_names[table]] = table_model
+
+    def _skip_table(self, table: str) -> bool:
+        # return False if it is not in the list of
+        # included tables
+        if len(self.include_tables) > 0:
+            for pat in self.include_tables:
+                if isinstance(pat, re.Pattern):
+                    if pat.match(table):
+                        break
+                else:
+                    if pat == table:
+                        break
+
+            else:
+                return False
+
+        # return False if it is in the list of excluded tables
+        for pat in self.exclude_tables:
+            if isinstance(pat, re.Pattern):
+                if pat.match(table):
+                    return False
+            else:
+                if pat == table:
+                    return False
+
+        return True

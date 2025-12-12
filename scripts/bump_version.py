@@ -84,7 +84,7 @@ if __name__ == "__main__":
     pyproject["project"]["version"] = stringify_version(new_ver)
 
     # read the __init__.py file
-    with open("src/typedre/__init__.py") as f:
+    with open("src/pwizard/__init__.py") as f:
         code = ast.parse(f.read())
 
     # update the value in the __init__ file
@@ -97,5 +97,5 @@ if __name__ == "__main__":
     # write all new versions
     with open("pyproject.toml", "w") as f:
         toml.dump(pyproject, f)
-    with open("src/typedre/__init__.py", "w") as f:
+    with open("src/pwizard/__init__.py", "w") as f:
         f.write(ast.unparse(code))

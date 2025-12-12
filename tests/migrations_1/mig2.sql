@@ -1,0 +1,4 @@
+CREATE TABLE tableB(
+	   id TEXT PRIMARY KEY NOT NULL,
+	   item TEXT NOT NULL
+);

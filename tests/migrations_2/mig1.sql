@@ -1,0 +1,5 @@
+CREATE TABLE tableA(
+	   id TEXT PRIMARY KEY NOT NULL,
+	   name TEXT NOT NULL,
+	   address TEXT NOT NULL
+);

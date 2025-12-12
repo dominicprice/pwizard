@@ -1,0 +1,3 @@
+CREATE TABLE tableC(
+	   id TEXT NOT NULL PRIMARY KEY
+);

@@ -1,0 +1,46 @@
+{% for module, items in imports.items() -%}
+from {{ module }} import {{ items | join(", ") }}
+{% endfor %}
+
+_db = {{ driver.database }}(None)
+
+{% for table in tables.values() %}
+class {{ table.model_name }}(Model):
+    "{{ table.model_name }} represents a row from the {{ table.table_name }} table"
+{%- for column in table.columns %}
+    {{ column.definition }}
+{%- endfor %}
+
+    class Meta:
+        database = _db
+        table_name = "{{ table.table_name }}"
+        {% if table.schema -%}
+        schema = "{{ table.schema }}"
+        {%- endif -%}
+        {% if table.indexes -%}
+        indexes = (
+        {%- for index in table.indexes %}
+            {{ index.definition }},
+        )
+        {% endfor -%}
+        {%- endif -%}
+        {% if table.primary_keys | length > 1 -%}
+        primary_key = CompositeKey("{{ table.primary_keys | join("', '") }}")
+        {%- elif table.primary_keys | length == 0 -%}
+        primary_key = False
+        {%- endif %}
+{% endfor %}
+
+{% if driver.value == "proxy" %}
+def connect(database: str | Database) -> Database:
+    if isinstance(database, str):
+        database = connect(database, **connect_params)
+    _db.initialise(database)
+	return database
+    
+{% else %}
+def connect(url: str, **connect_params) -> {{ driver.database }}:
+    _db.init(url, **connect_params)
+    _db.connect()
+    return _db
+{% endif %}

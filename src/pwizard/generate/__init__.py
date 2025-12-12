@@ -227,7 +227,7 @@ class Generator:
         tables[metadata.model_names[table]] = table_model
 
     def _skip_table(self, table: str) -> bool:
-        # return False if it is not in the list of
+        # return True if it is not in the list of
         # included tables
         if len(self.include_tables) > 0:
             for pat in self.include_tables:
@@ -239,15 +239,15 @@ class Generator:
                         break
 
             else:
-                return False
+                return True
 
-        # return False if it is in the list of excluded tables
+        # return True if it is in the list of excluded tables
         for pat in self.exclude_tables:
             if isinstance(pat, re.Pattern):
                 if pat.match(table):
-                    return False
+                    return True
             else:
                 if pat == table:
-                    return False
+                    return True
 
-        return True
+        return False

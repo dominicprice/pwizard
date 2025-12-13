@@ -4,7 +4,7 @@ from time import time_ns
 
 import peewee
 
-from pwizard.migrate.hooks import MigrationHooks
+from pwizard.migrate.hooks import MigrationHooksBase
 from pwizard.migrate.internal import AppliedMigration
 from pwizard.migrate.migration import Migration
 from pwizard.migrate.warnings import (
@@ -21,13 +21,13 @@ class Migrator:
         table_name: str = "migrations",
         text_type: str = "TEXT",
         fix_warnings: bool = False,
-        hooks: MigrationHooks | None = None,
+        hooks: MigrationHooksBase | None = None,
     ):
         self.migrations = list(migrations or [])
         self.table_name = table_name
         self.text_type = text_type
         self.fix_warnings = fix_warnings
-        self.hooks = hooks if hooks is not None else MigrationHooks()
+        self.hooks = hooks if hooks is not None else MigrationHooksBase()
 
     def set_migrations(self, migrations: t.Iterable[Migration]):
         self.migrations = list(migrations)

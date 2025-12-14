@@ -1,10 +1,11 @@
+import typing as t
 from datetime import timedelta
+
 from colorama import Fore, Style
 
-from pwizard.utils.duration import format_timedelta
 from pwizard.migrate.migration import Migration
 from pwizard.migrate.warnings import MigrationWarning
-import typing as t
+from pwizard.utils.duration import format_timedelta
 
 
 class MigrationHooksBase:

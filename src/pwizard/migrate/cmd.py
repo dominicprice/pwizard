@@ -7,9 +7,9 @@ from playhouse.db_url import connect
 from pwizard.migrate import Migrator
 from pwizard.migrate.hooks import (
     MigrationHooksBase,
-    MigrationHooksWarnings,
     MigrationHooksSummary,
     MigrationHooksVerbose,
+    MigrationHooksWarnings,
 )
 from pwizard.migrate.migration import Migration, SQLMigration
 

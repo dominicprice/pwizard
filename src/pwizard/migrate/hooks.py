@@ -121,6 +121,7 @@ class MigrationHooksSummary(MigrationHooksBase):
             + Fore.GREEN
             + str(applied)
             + " applied"
+            + Style.RESET_ALL
         )
 
     @t.override
@@ -177,6 +178,7 @@ class MigrationHooksVerbose(MigrationHooksBase):
             + Fore.GREEN
             + str(applied)
             + " applied"
+            + Style.RESET_ALL
         )
 
     @t.override

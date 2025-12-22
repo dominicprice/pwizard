@@ -28,6 +28,7 @@ class Generator:
         exclude_tables: list[str | re.Pattern] = [],
         include_views: bool = True,
         snake_case: bool = True,
+        custom_column_types: t.Mapping[str, type[peewee.Field]] | None = None,
     ):
         self.output_path = output_path
         self.driver = driver
@@ -39,6 +40,9 @@ class Generator:
         self.snake_case = snake_case
         self.include_tables = include_tables
         self.exclude_tables = exclude_tables
+        self.custom_column_types = (
+            {} if custom_column_types is None else dict(custom_column_types)
+        )
 
     @classmethod
     def from_config(cls, config_file: "StrOrBytesPath") -> t.Self:
@@ -93,6 +97,8 @@ class Generator:
 
         # get the data for the template from the database
         introspector = Introspector.from_database(database)
+        for colname, coltype in self.custom_column_types.items():
+            introspector.metadata.column_map[colname] = coltype
         metadata = introspector.introspect(
             include_views=self.include_views,
             snake_case=self.snake_case,
@@ -195,14 +201,15 @@ class Generator:
                 if isclass(value) and issubclass(value, peewee.Field):
                     value = value.__name__
                 field_params[key] = value
-            columns.append(
-                Column(
-                    col.name,
-                    col.field_class.__name__,
-                    field_params,
-                )
+            column = Column(
+                col.name,
+                col.field_class,
+                field_params,
             )
-            imports["peewee"].add(col.field_class.__name__)
+            columns.append(column)
+            modname, classname = column.get_import()
+            if modname is not None:
+                imports[modname].add(classname)
 
         indexes = []
         if multi_column_indexes := metadata.multi_column_indexes(table):

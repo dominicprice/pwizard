@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from peewee import Field
+
 
 class DatabaseType(str, Enum):
     Postgresql = "postgresql"
@@ -24,13 +26,20 @@ class DatabaseType(str, Enum):
 @dataclass
 class Column:
     name: str
-    type: str
+    type: type[Field]
     params: dict[str, str]
 
     @property
     def definition(self) -> str:
         params = ", ".join(f"{k}={v}" for k, v in self.params.items())
-        return f"{self.name} = {self.type}({params})"
+        return f"{self.name} = {self.type.__qualname__}({params})"
+
+    def get_import(self) -> tuple[str | None, str]:
+        modname = self.type.__module__
+        if self.type.__module__ == "builtins" or self.type.__module__ == "":
+            modname = None
+        classname = self.type.__qualname__.split(".")[0]
+        return modname, classname
 
 
 @dataclass

@@ -1,0 +1,12 @@
+"""
+{{ name }}
+{%- if description %}
+{{ description }}
+{% endif -%}
+Generated at {{ generated_at.isoformat() }}
+"""
+
+import peewee
+
+def migrate(database: peewee.Database) -> None:
+    pass

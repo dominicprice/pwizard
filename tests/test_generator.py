@@ -53,10 +53,10 @@ def test_schemas():
 
 
 def test_custom_types(tmp_path: Path):
+    # generate the models
     database = SqliteDatabase(":memory:")
     migrator = Migrator([SQLMigration(schemas_dir / "customtype.sql")])
     migrator.migrate(database)
-
     generator = Generator(
         tmp_path / "customtype.py",
         custom_column_types={
@@ -68,6 +68,7 @@ def test_custom_types(tmp_path: Path):
     generator.generate(database)
     database.close()
 
+    # load the generated module
     spec = importlib.util.spec_from_file_location(
         "customtype",
         tmp_path / "customtype.py",
@@ -78,9 +79,11 @@ def test_custom_types(tmp_path: Path):
     assert spec.loader is not None
     spec.loader.exec_module(customtype)
 
+    # connect and migrate a new database
     database = customtype.connect(":memory:")
     migrator.migrate(database)
 
+    # insert some rows
     customtype.Custom.create(
         name="Alice",
         favourite_colour=Colour.Blue,
@@ -88,17 +91,29 @@ def test_custom_types(tmp_path: Path):
     )
     customtype.Custom.create(
         name="Bob",
-        favourite_colour=Colour.Red,
-        status=Status.Active,
+        favourite_colour="red",
+        status=0,
     )
 
+    # assert we fetch the correct types for alice
     assert customtype.Custom.select().count() == 2
     res = (
-        customtype.Custom.select(
-            customtype.Custom.status, customtype.Custom.favourite_colour
+        customtype.Custom.select()
+        .where(
+            customtype.Custom.name == "Alice",
         )
-        .where(customtype.Custom.name == "Alice")
         .get()
     )
     assert res.favourite_colour is Colour.Blue
     assert res.status is Status.Deactivated
+
+    # assert we fetch the correct types for bob
+    res = (
+        customtype.Custom.select()
+        .where(
+            customtype.Custom.name == "Bob",
+        )
+        .get()
+    )
+    assert res.favourite_colour is Colour.Red
+    assert res.status is Status.Active

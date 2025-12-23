@@ -1,10 +1,10 @@
-from pathlib import Path
+import os
 from datetime import datetime
 from glob import glob
-import os
+from pathlib import Path
 
-import jinja2
 import click
+import jinja2
 from colorama import init as init_colorama
 from playhouse.db_url import connect
 

@@ -1,6 +1,7 @@
-import click
 import functools
 import typing as t
+
+import click
 
 _P = t.ParamSpec("_P")
 _T = t.TypeVar("_T")

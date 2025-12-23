@@ -35,7 +35,7 @@ class Column:
         return f"{self.name} = {self.type.__qualname__}({params})"
 
     def get_import(self) -> tuple[str | None, str]:
-        modname = self.type.__module__
+        modname: str | None = self.type.__module__
         if self.type.__module__ == "builtins" or self.type.__module__ == "":
             modname = None
         classname = self.type.__qualname__.split(".")[0]

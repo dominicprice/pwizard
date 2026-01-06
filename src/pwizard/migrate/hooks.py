@@ -1,4 +1,5 @@
 import typing as t
+import logging
 from datetime import timedelta
 
 from colorama import Fore, Style
@@ -205,4 +206,55 @@ class MigrationHooksVerbose(MigrationHooksBase):
                 + ("fixed: " if fixed else "warning: ")
                 + warning.describe()
                 + Style.RESET_ALL
+            )
+
+
+class MigrationHooksLogger(MigrationHooksBase):
+    """
+    Migration hooks which print warnings, a summary and
+    progress for each individual migration
+    """
+
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+
+    @t.override
+    def on_begin_migrations(self, num_migrations: int):
+        self.logger.info("starting %d migrations", num_migrations)
+
+    @t.override
+    def on_finish_migrations(
+        self, skipped: int, warned: int, applied: int, elapsed: timedelta
+    ):
+        self.logger.info(
+            "completed in %s, %d skipped, %d warnings, %d applied",
+            format_timedelta(elapsed),
+            skipped,
+            warned,
+            applied,
+        )
+
+    @t.override
+    def on_before_migration(self, migration: Migration):
+        self.logger.info("applying: %s", migration.name())
+
+    @t.override
+    def on_after_migration(
+        self,
+        migration: Migration,
+        applied: bool,
+        warning: MigrationWarning | None,
+        fixed: bool,
+    ):
+        _ = migration
+        if applied:
+            self.logger.info("applied: %s", migration.name())
+        else:
+            self.logger.info("skipped: %s", migration.name())
+        if warning is not None:
+            self.logger.warning(
+                "%s: %s: %s",
+                "fixed" if fixed else "warning",
+                migration.name(),
+                warning.describe(),
             )

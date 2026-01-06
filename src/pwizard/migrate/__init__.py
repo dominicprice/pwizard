@@ -32,7 +32,7 @@ class Migrator:
     def set_migrations(self, migrations: t.Iterable[Migration]):
         self.migrations = list(migrations)
 
-    def migrate(self, database: peewee.Database):
+    def migrate(self, database: peewee.Database, transaction_type: str | None = None):
         self.hooks.on_begin_migrations(len(self.migrations))
 
         skipped = 0
@@ -41,7 +41,11 @@ class Migrator:
         parent: str | None = None
         start_time = time_ns()
 
-        with database.atomic():
+        if transaction_type is None:
+            atomic_args = ()
+        else:
+            atomic_args = (transaction_type,)
+        with database.atomic(*atomic_args):
             self._ensure_migrations_table(database)
             for migration in self.migrations:
                 self.hooks.on_before_migration(migration)
